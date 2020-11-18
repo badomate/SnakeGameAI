@@ -37,6 +37,11 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
+            // m_Timer
+            // 
+            this.m_Timer.Interval = 1;
+            this.m_Timer.Tick += new System.EventHandler(this.OnTimerTick);
+            // 
             // m_RestartBtn
             // 
             this.m_RestartBtn.Location = new System.Drawing.Point(140, 0);

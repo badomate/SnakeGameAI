@@ -55,12 +55,5 @@ namespace Snake.SnakeGame
             Y = 0;
             Direction = Direction.Up;
         }
-        /*
-        public void MoveTo(int a, int b)
-        {
-            m_Pieces.Enqueue(new Food(HeadX + a, HeadY + b, m_Color));
-            m_Pieces.Dequeue();
-        }
-        */
     }
 }

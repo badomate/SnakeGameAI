@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using Snake.Astar;
+using Snake.CanEat;
 using Snake.Hamiltonian;
 using Snake.PathNotFound;
 using Snake.WallMaker;
@@ -20,8 +21,10 @@ namespace Snake.SnakeGame
         PathNotFoundClass pathNotFound = new PathNotFoundClass();
         WallMakerClass wallMaker = new WallMakerClass();
         PathFinderAStar pathFinder = new PathFinderAStar();
+        CanEatClass canEat = new CanEatClass();
+
         public List<SnakeBody> ElozoKigyo = new List<SnakeBody>();
-        private SnakeBody Snake;
+        protected SnakeBody SnakeBodies;
         private Food food;
         private Food elozo;
         public int[,] gridfal;
@@ -29,11 +32,17 @@ namespace Snake.SnakeGame
         public List<int> PathPartial = new List<int>();
         int kor = 0;
         public bool nincsUt = false;
+        public int[,] pathGrid;
         Color back;
-
+        bool first;
+        int sorszam;
+        bool ehete = false;
         public const int Hossz = 1024 / 32;
         public const int Magassag = 512 / 32;
         private const string SCORE_STRING = "Score: {0}";
+        int sorSzamSzamonTartas = 0;
+        public bool aStar;
+        bool nincsUjHamiltonian;
         public SnakeGameForm()
         {
             InitializeComponent();
@@ -41,17 +50,13 @@ namespace Snake.SnakeGame
             //m_Game = new Game(WIDTH, HEIGHT);
             //m_Timer.Start();
 
-            // 
-            // m_Timer
-            // 
-            this.m_Timer.Interval = 10;
-            this.m_Timer.Tick += new System.EventHandler(this.OnTimerTick);
+
 
         }
         public void StartGame()
         {
             Debug.WriteLine("Startgame\n");
-            Snake = new SnakeBody(0, Magassag - 1);
+            SnakeBodies = new SnakeBody(0, Magassag - 1);
             Path = hamiltonian.HamiltonianGenerator(Hossz, Magassag);
             //UtvonalGeneralas();
             GenerateFood();
@@ -62,7 +67,7 @@ namespace Snake.SnakeGame
         private void UpdateScore()
         {
             Debug.WriteLine("UpdateScore\n");
-            scoreLbl.Text = string.Format(SCORE_STRING, Snake.Farok.Count());
+            scoreLbl.Text = string.Format(SCORE_STRING, SnakeBodies.Farok.Count());
         }
 
         private void OnTimerTick(object sender, EventArgs e)
@@ -74,7 +79,7 @@ namespace Snake.SnakeGame
                 GenerateFood();
             }
 
-            if (Snake.Dead)
+            if (SnakeBodies.Dead)
             {
                 m_Timer.Stop();
                 m_RestartBtn.Enabled = true;
@@ -97,9 +102,9 @@ namespace Snake.SnakeGame
                 jo = true;
                 food = null;
                 food = new Food(random.Next(0, Hossz - 1), random.Next(0, Magassag - 1));
-                if (Snake.Farok.Count > 0)
+                if (SnakeBodies.Farok.Count > 0)
                 {
-                    foreach (var item in Snake.Farok)
+                    foreach (var item in SnakeBodies.Farok)
                     {
                         if (item[0] == food.X)
                         {
@@ -111,15 +116,14 @@ namespace Snake.SnakeGame
                     }
                 }
 
-                if (Snake.X == food.X)
+                if (SnakeBodies.X == food.X)
                 {
-                    if (Snake.Y == food.Y)
+                    if (SnakeBodies.Y == food.Y)
                     {
                         jo = false;
                     }
                 }
             } while (!jo);
-
             food.Eaten = false;
 
             UtvonalGeneralas();
@@ -129,45 +133,91 @@ namespace Snake.SnakeGame
         }
         private void UtvonalGeneralas()
         {
-            /*
-            int[,] pathGrid = wallMaker.ListToMatrix(Path, new Tuple<int, int>(Hossz, Magassag));
-            Path.Clear();
-            int x = 0;
-            
-            int y = Magassag -1;
-            do
+            nincsUjHamiltonian = true;
+            Debug.WriteLine("Ut generalas");
+            kor = 0;
+            //gridfal = wallMaker.WallMakerGenerator(Path, Snake, food, new Tuple<int, int>(Hossz, Magassag), false);
+            if (pathGrid == null)
             {
-                switch (pathGrid[x, y])
-                {
-                    case 0:
-                        {
-                            Path.Add(0);
-                            y--;
-                            break;
-                        }
-                    case 1:
-                        {
-                            Path.Add(1);
-                            y++;
-                            break;
-                        }
-                    case 2:
-                        {
-                            Path.Add(2);
-                            x++;
-                            break;
-                        }
-                    case 3:
-                        {
-                            Path.Add(3);
-                            x--;
-                            break;
-                        }
-                }
-            } while (!(x == 0 && y == Magassag -1));
-            */
-
+                first = true;
+                pathGrid = wallMaker.ListToMatrix(Path, new Tuple<int, int>(Hossz, Magassag));
+                Path.Clear();
+            }
             
+            ehete = false;
+            List<int> LehetePath;
+            ehete = canEat.CanEatClassGenerator(pathGrid, SnakeBodies, food, out LehetePath);
+            if (LehetePath != null)
+                if (LehetePath.Count == 0)
+                    ehete = false;
+            if (ehete)
+            {
+                aStar = true;
+                Debug.WriteLine("Uj Astar utvonal");
+                Path.Clear();
+                sorszam = 0;
+                Path = LehetePath;
+                back = Color.White;
+                first = true;
+
+            }
+            else
+            {
+                aStar = false;
+                int x = SnakeBodies.X;
+                int y = SnakeBodies.Y;
+                int k = 0;
+
+                if (first)
+                {
+                    Debug.WriteLine("Uj hamiltonian utvonal");
+                    Path.Clear();
+                    sorszam = 0;
+                    do
+                    {
+                        switch (pathGrid[x, y])
+                        {
+                            case 0:
+                                {
+                                    Path.Add(0);
+                                    y--;
+                                    break;
+                                }
+                            case 1:
+                                {
+                                    Path.Add(1);
+                                    y++;
+                                    break;
+                                }
+                            case 2:
+                                {
+                                    Path.Add(2);
+                                    x++;
+                                    break;
+                                }
+                            case 3:
+                                {
+                                    Path.Add(3);
+                                    x--;
+                                    break;
+                                }
+                        }
+                        k++;
+                    } while (k != pathGrid.GetLength(0) * pathGrid.GetLength(1));
+                    back = Color.Red;
+                    sorszam = 0;
+                    nincsUjHamiltonian = false;
+                }
+                else
+                {
+                    Debug.WriteLine("marad a régi hamiltonian");
+                }
+                first = false;
+            }
+
+
+
+            /*
             back = Color.White;
             kor = 0;
             Debug.WriteLine("gridfal szamolas.....");
@@ -198,52 +248,63 @@ namespace Snake.SnakeGame
                 nincsUt = true;
             }
             Debug.WriteLine("Kesz\n");
-            
+            */
 
         }
         private void UpdateScreen()
         {
-            
-            if (kor >= PathPartial.Count())
+            if(sorszam >= 10 && !aStar)
             {
+                UtvonalGeneralas();                
+            }
+            if (nincsUjHamiltonian == true && !aStar)
+                kor = sorszam;
+            if (kor >= Path.Count)
+            {
+                sorszam = 0;
                 UtvonalGeneralas();
             }
-            
 
-            switch (PathPartial[kor])
+            switch (Path[kor])
             {
                 case 0:
                     {
-                        Snake.Direction = Direction.Up;
+                        Debug.WriteLine("Fel");
+                        SnakeBodies.Direction = Direction.Up;
                         kor++;
                         break;
                     }
                 case 1:
                     {
-                        Snake.Direction = Direction.Down;
+                        Debug.WriteLine("Le");
+                        SnakeBodies.Direction = Direction.Down;
                         kor++;
                         break;
                     }
                 case 2:
                     {
-                        Snake.Direction = Direction.Right;
+                        Debug.WriteLine("Jobb");
+                        SnakeBodies.Direction = Direction.Right;
                         kor++;
                         break;
                     }
                 case 3:
                     {
-                        Snake.Direction = Direction.Left;
+                        Debug.WriteLine("Bal");
+                        SnakeBodies.Direction = Direction.Left;
                         kor++;
                         break;
                     }
 
             }
-            /*
-            if(kor >= Path.Count)
-            {
-                kor = 0;
-            }
-            */
+            sorszam++;
+            //if (kor == Path.Count)
+            //{
+            //    UtvonalGeneralas();
+            //    if (ujHamiltonian == true)
+            //        sorszam = 0;
+            //}
+
             MovePlayer();
 
 
@@ -254,63 +315,64 @@ namespace Snake.SnakeGame
 
         private void MovePlayer()
         {
-            SnakeBody elozo = Snake;
-            if (Snake.Farok.Count > 0)
+            SnakeBody elozo = SnakeBodies;
+            if (SnakeBodies.Farok.Count > 0)
             {
-                for (int i = Snake.Farok.Count - 1; i >= 0; i--)
+                for (int i = SnakeBodies.Farok.Count - 1; i >= 0; i--)
                 {
                     if (i > 0)
                     {
-                        if (Snake.Farok[i] == Snake.Farok[i - 1])
+                        if (SnakeBodies.Farok[i] == SnakeBodies.Farok[i - 1])
                             continue;
-                        Snake.Farok[i][0] = Snake.Farok[i - 1][0];
-                        Snake.Farok[i][1] = Snake.Farok[i - 1][1];
+                        SnakeBodies.Farok[i][0] = SnakeBodies.Farok[i - 1][0];
+                        SnakeBodies.Farok[i][1] = SnakeBodies.Farok[i - 1][1];
                         continue;
                     }
-                    Snake.Farok[0][0] = Snake.X;
-                    Snake.Farok[0][1] = Snake.Y;
+                    SnakeBodies.Farok[0][0] = SnakeBodies.X;
+                    SnakeBodies.Farok[0][1] = SnakeBodies.Y;
                 }
             }
 
-            switch (Snake.Direction)
+            switch (SnakeBodies.Direction)
             {
                 case Direction.Right:
-                    Snake.X += 1;
+                    SnakeBodies.X += 1;
                     break;
                 case Direction.Left:
-                    Snake.X -= 1;
+                    SnakeBodies.X -= 1;
                     break;
                 case Direction.Up:
-                    Snake.Y -= 1;
+                    SnakeBodies.Y -= 1;
                     break;
                 case Direction.Down:
-                    Snake.Y += 1;
+                    SnakeBodies.Y += 1;
                     break;
             }
             ElozoKigyo.Add(new SnakeBody(elozo.X, elozo.Y));
             ElozoKigyo.Last().Farok = elozo.Farok;
-            if (Snake.HitWall() || Snake.EatsItself())
+            if (SnakeBodies.HitWall() || SnakeBodies.EatsItself())
                 Die();
 
-            if (Snake.X == food.X && Snake.Y == food.Y)
+            if (SnakeBodies.X == food.X && SnakeBodies.Y == food.Y)
                 Eat();
 
 
 
 
         }
+
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
             BackColor = back;
             Graphics canvas = e.Graphics;
-            if (Snake != null)
+            if (SnakeBodies != null)
             {
                 Brush snakeColour;
 
-                if (Snake.Farok != null)
+                if (SnakeBodies.Farok != null)
                 {
                     snakeColour = Brushes.Green;
-                    foreach (var item in Snake.Farok)
+                    foreach (var item in SnakeBodies.Farok)
                     {
                         canvas.FillRectangle(snakeColour,
                             new Rectangle(item[0] * Food.SIDE,
@@ -322,8 +384,8 @@ namespace Snake.SnakeGame
                 snakeColour = Brushes.Black;
 
                 canvas.FillRectangle(snakeColour,
-                         new Rectangle(Snake.X * Food.SIDE,
-                                       Snake.Y * Food.SIDE,
+                         new Rectangle(SnakeBodies.X * Food.SIDE,
+                                       SnakeBodies.Y * Food.SIDE,
                                        Food.SIDE, Food.SIDE));
 
                 canvas.FillEllipse(Brushes.Red,
@@ -350,29 +412,30 @@ namespace Snake.SnakeGame
         {
             Debug.WriteLine("Eat\n");
             int[] farokVeg = new int[2];
-            if (Snake.Farok.Count > 0)
+            if (SnakeBodies.Farok.Count > 0)
             {
-                farokVeg[0] = Snake.Farok.Last()[0];
-                farokVeg[1] = Snake.Farok.Last()[1];
+                farokVeg[0] = SnakeBodies.Farok.Last()[0];
+                farokVeg[1] = SnakeBodies.Farok.Last()[1];
             }
             else
             {
-                farokVeg[0] = Snake.X;
-                farokVeg[1] = Snake.Y;
+                farokVeg[0] = SnakeBodies.X;
+                farokVeg[1] = SnakeBodies.Y;
             }
-            Snake.Farok.Add(farokVeg);
+            SnakeBodies.Farok.Add(farokVeg);
             food.Eaten = true;
             UpdateScore();
         }
 
         private void Die()
         {
+            kor = 0;
             m_RestartBtn.Enabled = true;
             m_Timer.Stop();
             PathPartial.Clear();
             Debug.WriteLine("-------------------------------------------------------------------------------------------\nhalott\n-------------------------------------------------------------------------------------------");
             m_RestartBtn.Enabled = false;
-            Snake.Clear();
+            SnakeBodies.Clear();
             UpdateScore();
             m_Timer.Start();
             StartGame();
@@ -381,7 +444,7 @@ namespace Snake.SnakeGame
         private void OnRestartBtnClick(object sender, EventArgs e)
         {
             m_RestartBtn.Enabled = false;
-            Snake.Clear();
+            SnakeBodies.Clear();
             UpdateScore();
             m_Timer.Start();
             StartGame();

@@ -175,25 +175,25 @@ namespace Snake.Hamiltonian
                     {
                         case 0:
                             {
-                                Path.Add(0);
+                                Path.Add(2);
                                 k++;
                                 break;
                             }
                         case 1:
                             {
-                                Path.Add(1);
+                                Path.Add(3);
                                 k--;
                                 break;
                             }
                         case 2:
                             {
-                                Path.Add(2);
+                                Path.Add(1);
                                 h++;
                                 break;
                             }
                         case 3:
                             {
-                                Path.Add(3);
+                                Path.Add(0);
                                 h--;
                                 break;
                             }

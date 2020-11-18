@@ -11,7 +11,7 @@ namespace Snake.Astar
     {
         public SnakeBody Snake;
         List<int[]> Tilos;
-        public List<int> AStarGenerator(int[,] grid, Tuple<int, int> start, Tuple<int, int> finish, SnakeBody snake, List<int> elozoPath)
+        public List<int> AStarGenerator(int[,] grid, Tuple<int, int> start, Tuple<int, int> finish, SnakeBody snake, out List<Tile> almostPath)
         {
             Tilos = new List<int[]>();
             for (int i = 0; i < grid.GetLength(0); i++)
@@ -29,26 +29,26 @@ namespace Snake.Astar
                 {
                     case SnakeGame.Direction.Down:
                         {
-                            grid[start.Item1, start.Item2 - 1] = -1;
-                            Tilos.Add(new int[] { start.Item1, start.Item2 - 1 });
+                            grid[start.Item1, start.Item2] = -1;
+                            Tilos.Add(new int[] { start.Item1, start.Item2 });
                             break;
                         }
                     case SnakeGame.Direction.Up:
                         {
-                            grid[start.Item1, start.Item2 + 1] = -1;
-                            Tilos.Add(new int[] { start.Item1, start.Item2 + 1 });
+                            grid[start.Item1, start.Item2] = -1;
+                            Tilos.Add(new int[] { start.Item1, start.Item2 });
                             break;
                         }
                     case SnakeGame.Direction.Right:
                         {
-                            grid[start.Item1 - 1, start.Item2] = -1;
-                            Tilos.Add(new int[] { start.Item1 - 1, start.Item2 });
+                            grid[start.Item1, start.Item2] = -1;
+                            Tilos.Add(new int[] { start.Item1, start.Item2 });
                             break;
                         }
                     case SnakeGame.Direction.Left:
                         {
-                            grid[start.Item1 + 1, start.Item2] = -1;
-                            Tilos.Add(new int[] { start.Item1 + 1, start.Item2 });
+                            grid[start.Item1, start.Item2] = -1;
+                            Tilos.Add(new int[] { start.Item1, start.Item2 });
                             break;
                         }
                 }
@@ -65,8 +65,8 @@ namespace Snake.Astar
                 X = start.Item1,
                 Y = start.Item2
             };
+            almostPath = PathFinder(grid, _start, _finish);
 
-            List<Tile> almostPath = PathFinder(grid, _start, _finish);
             almostPath.Reverse();
             List<int> path = new List<int>();
             if (almostPath.Count == 0)
@@ -123,7 +123,7 @@ namespace Snake.Astar
             activeTiles.Add(start);
             var visitedTiles = new List<Tile>();
             Tilos = Tilos.Where(x => x[0] != finish.X || x[1] != finish.Y).ToList();
-            foreach(var item in Tilos)
+            foreach (var item in Tilos)
             {
                 if (item[0] == finish.X && item[1] == finish.X)
                     continue;
@@ -201,13 +201,13 @@ namespace Snake.Astar
             szomszedok = szomszedok.Where(x => x.X >= 0).ToList();
             szomszedok = szomszedok.Where(x => x.Y >= 0).ToList();
 
-            
+
             if (szomszedok.Where(x => x.X == target.X && x.Y == target.Y).Count() > 0)
             {
                 return szomszedok;
             }
 
-            while(szomszedok.Where(x => Tilos.Where(y => y[0] == x.X && y[1] == x.Y).Count() > 0 ).Count() > 0)
+            while (szomszedok.Where(x => Tilos.Where(y => y[0] == x.X && y[1] == x.Y).Count() > 0).Count() > 0)
             {
                 var szomszed = szomszedok.Where(x => Tilos.Where(y => y[0] == x.X && y[1] == x.Y).Count() > 0).First();
                 szomszedok.Remove(szomszed);
@@ -215,6 +215,10 @@ namespace Snake.Astar
             if (szomszedok.Where(x => grid[x.X, x.Y] == -1).Count() > 0)
             {
                 szomszedok = szomszedok.Where(x => grid[x.X, x.Y] != -1).ToList();
+            }
+            if (szomszedok.Any(x => x.X < 0))
+            {
+                Debug.WriteLine("df");
             }
             return szomszedok;
         }

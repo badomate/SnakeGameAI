@@ -51,7 +51,6 @@
     <Compile Include="CanEat\CanEatClass.cs" />
     <Compile Include="PathNotFound\PathNotFoundClass.cs" />
     <Compile Include="Snake\Food.cs" />
-    <Compile Include="Snake\Game.cs" />
     <Compile Include="Hamiltonian\Hamiltonian.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
