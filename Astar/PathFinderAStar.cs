@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using Snake.SnakeGame;
 
 namespace Snake.Astar
@@ -72,7 +71,6 @@ namespace Snake.Astar
             if (almostPath.Count == 0)
                 return null;
             Tile elozo = almostPath.First();
-            //almostPath.RemoveAt(0);
 
             foreach (Tile item in almostPath)
             {

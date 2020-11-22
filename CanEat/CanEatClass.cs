@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Snake.Astar;
 using Snake.SnakeGame;
 using Snake.WallMaker;
@@ -15,10 +14,9 @@ namespace Snake.CanEat
         public bool CanEatClassGenerator(int[,] grid, SnakeBody kigyo, Food kaja, out List<int> AStar)
         {
             // System.Drawing.Point
-            
+
             List<int[]> snake = new List<int[]>();
             kigyo.Farok.ForEach(c => snake.Add(new int[] { c[0], c[1] }));
-
             bool ehete = true;
             int[,] wall_grid = wallMaker.WallMakerGenerator(grid, kigyo, kaja);
             List<Tile> almostPath;
@@ -31,16 +29,6 @@ namespace Snake.CanEat
             if (kigyo.Farok != null)
                 if (kigyo.Farok.Count > grid.GetLength(1) * grid.GetLength(0) * 0.05)
                 {
-                    /*
-                     
-                    megvan a hamiltonian, vagyis tudom utána merre kéne menni,
-                    ha legrovidebb hosszabb mint kigyo, csak a kigyo fejét nézem
-                    ha rövidebb, akkor tömb=> kigyo farka hátuljától annyi nlgyzet amennyivel rövidebb
-
-                    vizsgálat:
-                        hamiltoniannak a kigyo / 2 +1 hosszú része végéig, lépésenként, a kígyót is léptetem golyamatosan, és ha vége a hamiltoniannak akkor vissza küldöm, 
-
-                    */
 
                     List<int[]> vizsgalando_hamiltonian = new List<int[]>();
                     int x = kaja.X;

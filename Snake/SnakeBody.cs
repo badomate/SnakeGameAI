@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace Snake.SnakeGame
@@ -43,7 +42,7 @@ namespace Snake.SnakeGame
         public bool HitWall()
         {
             bool falbaVanE = false;
-            if (X == -1 || X >= SnakeGameForm.Hossz  || Y == -1 || Y >= SnakeGameForm.Magassag )
+            if (X == -1 || X >= SnakeGameForm.Hossz || Y == -1 || Y >= SnakeGameForm.Magassag)
                 falbaVanE = true;
             return falbaVanE;
         }

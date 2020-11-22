@@ -1,8 +1,6 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Snake.SnakeGame;
 
 namespace Snake.WallMaker
@@ -13,7 +11,6 @@ namespace Snake.WallMaker
         public int[,] WallMakerGenerator(int[,] gridUtvonal, SnakeBody kigyo, Food alma)
         {
             int[,] grid = new int[gridUtvonal.GetLength(0), gridUtvonal.GetLength(1)];
-            int z = 0;
             if (almaElozo != null)
             {
                 foreach (var item in kigyo.Farok)
@@ -62,8 +59,8 @@ namespace Snake.WallMaker
 
                 }
             }
-                almaElozo = alma;
-            
+            almaElozo = alma;
+
             //if (faroke)
             //{
             //    grid[kigyo.Farok.Last()[0], kigyo.Farok.Last()[1]] = 0;
@@ -77,7 +74,6 @@ namespace Snake.WallMaker
             int[,] grid = new int[meret.Item1, meret.Item2];
             int x = 0;
             int y = 0;
-            int z = 0;
             foreach (int item in utvonal)
             {
                 switch (item)

@@ -49,7 +49,6 @@
     <Compile Include="Astar\Tile.cs" />
     <Compile Include="Astar\PathFinderAStar.cs" />
     <Compile Include="CanEat\CanEatClass.cs" />
-    <Compile Include="PathNotFound\PathNotFoundClass.cs" />
     <Compile Include="Snake\Food.cs" />
     <Compile Include="Hamiltonian\Hamiltonian.cs" />
     <Compile Include="Program.cs" />

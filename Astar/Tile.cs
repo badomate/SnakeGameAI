@@ -11,7 +11,7 @@ namespace Snake.Astar
         public int CostDistance => Cost + Distance;
         public Tile Parent { get; set; }
 
-        
+
         public void SetDistance(int targetX, int targetY)
         {
             this.Distance = Math.Abs(targetX - X) + Math.Abs(targetY - Y);
