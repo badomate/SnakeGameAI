@@ -1,6 +1,6 @@
 # SnakeGameAI
 
-My I for the Snake game, it's developement is currently on hold. Almost perfect, only dies on the last 10 percent, the reason of that is under invetigation. 
+My AI for the Snake game, it's developement is currently on hold. Almost perfect, only dies on the last 10 percent, the reason of that is under invetigation. 
 
 At the beggining the program generates a hemilonian cycle (https://mathworld.wolfram.com/HamiltonianCycle.html) tha algortihm is very inefficent. I have plans to make it parallel. 
 
